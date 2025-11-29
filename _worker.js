@@ -82,12 +82,12 @@ async function nginx() {
 	<h1>Welcome to nginx!</h1>
 	<p>If you see this page, the nginx web server is successfully installed and
 	working. Further configuration is required.</p>
-	
+
 	<p>For online documentation and support please refer to
 	<a href="http://nginx.org/">nginx.org</a>.<br/>
 	Commercial support is available at
 	<a href="http://nginx.com/">nginx.com</a>.</p>
-	
+
 	<p><em>Thank you for using nginx.</em></p>
 	</body>
 	</html>
@@ -108,7 +108,7 @@ async function searchInterface() {
 			--github-color: #f0f6fc;
 			--githubbj-color: #010409;
 		}
-		
+
 		* {
 			box-sizing: border-box;
 			margin: 0;
@@ -176,7 +176,7 @@ async function searchInterface() {
 		.github-corner:hover .octo-arm {
 			animation: octocat-wave 560ms ease-in-out;
 		}
-			
+
 		@keyframes octocat-wave {
 			0%, 100% {
 				transform: rotate(0);
@@ -279,11 +279,11 @@ async function searchInterface() {
 			.search-container {
 				height: 45px;
 			}
-			
+
 			#search-input {
 				padding: 0 15px;
 			}
-			
+
 			#search-button {
 				padding: 0 20px;
 			}
@@ -324,7 +324,7 @@ async function searchInterface() {
 				window.location.href = '/search?q=' + encodeURIComponent(query);
 			}
 		}
-	
+
 		document.getElementById('search-button').addEventListener('click', performSearch);
 		document.getElementById('search-input').addEventListener('keypress', function(event) {
 			if (event.key === 'Enter') {
@@ -417,21 +417,28 @@ export default {
 		}
 
 		// 处理token请求
-		if (url.pathname.includes('/token')) {
-			let token_parameter = {
-				headers: {
-					'Host': 'auth.docker.io',
-					'User-Agent': getReqHeader("User-Agent"),
-					'Accept': getReqHeader("Accept"),
-					'Accept-Language': getReqHeader("Accept-Language"),
-					'Accept-Encoding': getReqHeader("Accept-Encoding"),
-					'Connection': 'keep-alive',
-					'Cache-Control': 'max-age=0'
-				}
-			};
-			let token_url = auth_url + url.pathname + url.search;
-			return fetch(new Request(token_url, request), token_parameter);
-		}
+		// 处理token请求
+        if (url.pathname.includes('/token')) {
+            let token_parameter = {
+                headers: {
+                    'Host': 'auth.docker.io',
+                    'User-Agent': getReqHeader("User-Agent"),
+                    'Accept': getReqHeader("Accept"),
+                    'Accept-Language': getReqHeader("Accept-Language"),
+                    'Accept-Encoding': getReqHeader("Accept-Encoding"),
+                    'Connection': 'keep-alive',
+                    'Cache-Control': 'max-age=0'
+                }
+            };
+
+            // 添加 Authorization 头转发
+            if (request.headers.has("Authorization")) {
+                token_parameter.headers.Authorization = getReqHeader("Authorization");
+            }
+
+            let token_url = auth_url + url.pathname + url.search;
+            return fetch(new Request(token_url, request), token_parameter);
+        }
 
 		// 修改 /v2/ 请求路径
 		if (hub_host == 'registry-1.docker.io' && /^\/v2\/[^/]+\/[^/]+\/[^/]+$/.test(url.pathname) && !/^\/v2\/library/.test(url.pathname)) {
